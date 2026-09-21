@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Smart Campus Navigation System</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<style>
+
+body{
+font-family:Arial;
+}
+
+#map{
+height:500px;
+width:80%;
+margin:auto;
+border:3px solid black;
+}
+
+#destination{
+width:200px;
+padding:5px;
+}
+
+button{
+padding:6px 12px;
+}
+
+</style>
+
+</head>
+
+<body bgcolor="cyan">
+
+<table border="0" width="100%" bgcolor="lightblue">
+<tr>
+<td align="center">
+<h1>Smart Campus Navigation System</h1>
+<p>Helping Students Navigate the Campus Easily</p>
+</td>
+</tr>
+</table>
+
+<br>
+
+<table border="1" width="100%">
+<tr align="center">
+<td>Home</td>
+<td>Campus Map</td>
+<td>Search Location</td>
+<td>Events</td>
+<td>Accessibility Routes</td>
+<td>Contact</td>
+</tr>
+</table>
+
+<br>
+
+<table border="1" width="100%">
+<tr>
+<td align="center">
+
+<h2>Search Campus Location</h2>
+
+<input list="places" id="destination" placeholder="Library, Lab, Stadium">
+
+<datalist id="places">
+<option value="Library">
+<option value="Lab">
+<option value="Classroom">
+<option value="Canteen">
+<option value="Stadium">
+</datalist>
+
+<button onclick="findRoute()">Find Route</button>
+
+<p id="result"></p>
+
+</td>
+</tr>
+</table>
+
+<br>
+
+<table border="1" width="100%">
+<tr>
+<td align="center">
+
+<h2>Campus Navigation Map</h2>
+
+<div id="map"></div>
+
+</td>
+</tr>
+</table>
+
+<br>
+
+<table border="1" width="100%">
+<tr>
+<td align="center">
+<h2>System Features</h2>
+</td>
+</tr>
+
+<tr>
+<td>
+<ul>
+<li>Interactive Campus Navigation</li>
+<li>Search Buildings</li>
+<li>Shortest Path Navigation</li>
+<li>Clickable Locations</li>
+<li>Distance Calculation</li>
+</ul>
+</td>
+</tr>
+</table>
+
+<br>
+
+<table border="0" width="100%" bgcolor="lightgray">
+<tr>
+<td align="center">
+<p>Smart Campus Navigation System | Group Project</p>
+</td>
+</tr>
+</table>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+var map=L.map('map').setView([31.2536,75.7033],16);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+}).addTo(map);
+
+var start=[31.2536,75.7033];
+
+L.marker(start).addTo(map)
+.bindPopup("Main Gate");
+
+var locations={
+
+library:[31.2543,75.7041],
+
+lab:[31.2530,75.7050],
+
+classroom:[31.2525,75.7035],
+
+canteen:[31.2528,75.7025],
+
+stadium:[31.2552,75.7038]
+
+var occupancy={
+
+library:{current:30,max:100},
+
+lab:{current:10,max:30},
+
+classroom:{current:40,max:60},
+
+canteen:{current:25,max:50},
+
+stadium:{current:120,max:300}
+
+};
+
+
+var routeLine;
+
+Object.keys(locations).forEach(function(place){
+
+let occ = occupancy[place];
+
+let level="Low";
+
+if(occ.current>occ.max*0.7){
+level="Very Busy";
+}
+else if(occ.current>occ.max*0.4){
+level="Moderate";
+}
+
+let text =
+place +
+"<br>Occupancy: " + occ.current + " / " + occ.max +
+"<br>Status: " + level;
+
+L.marker(locations[place])
+.addTo(map)
+.bindPopup(text);
+
+});
+
+function findRoute(){
+
+let destination=document
+.getElementById("destination")
+.value
+.toLowerCase();
+
+if(!locations[destination]){
+
+document.getElementById("result")
+.innerText="Location not found";
+
+return;
+
+}
+
+let end=locations[destination];
+
+if(routeLine){
+map.removeLayer(routeLine);
+}
+
+routeLine=L.polyline([start,end],{
+color:'blue'
+}).addTo(map);
+
+map.fitBounds(routeLine.getBounds());
+
+let distance=map.distance(start,end)/1000;
+
+document.getElementById("result").innerText=
+"Route distance: "+distance.toFixed(2)+" km";
+
+}
+
+function updateOccupancy(){
+
+Object.keys(occupancy).forEach(function(place){
+
+let max = occupancy[place].max;
+
+occupancy[place].current =
+Math.floor(Math.random()*max);
+
+});
+
+}
+
+setInterval(updateOccupancy,5000);
+
+</script>
+
+</body>
+</html>
